@@ -4,68 +4,10 @@ import 'package:path/path.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const schema = Schema([
-  Table('app_taxprofile', [
-    Column.text('tax_name'),
-    Column.real('tax_percentage'),
-    Column.text('createdAt'),
-    Column.text('updatedAt'),
-    Column.integer('restaurant_id'),
-    Column.text('ntak_name')
-  ]),
-  Table('users', [
-    Column.text('rest_id'),
-    Column.text('role'),
-    Column.text('pk')
-  ]),
-  Table('app_restaurant', [
-    Column.text('email'),
-    Column.text('restaurant_name'),
-    Column.text('phone')
-  ]),
-  Table('app_product', [
-    Column.text('product_name'),
-    Column.real('price'),
-    Column.text('createdAt'),
-    Column.text('updatedAt'),
-    Column.integer('category_id'),
-    Column.integer('restaurant_id'),
-    Column.integer('featured'),
-    Column.integer('promotion'),
-    Column.real('promotion_price'),
-    Column.text('picture'),
-    Column.text('description'),
-    Column.text('product_code'),
-    Column.integer('isPizza'),
-    Column.integer('isDelete'),
-    Column.integer('isDisabled'),
-    Column.integer('isDrink'),
-    Column.integer('isCoupon'),
-    Column.integer('isLocal'),
-    Column.text('expire'),
-    Column.text('start'),
-    Column.integer('dineInTax_id'),
-    Column.integer('packaging'),
-    Column.real('packagingPrice'),
-    Column.integer('deliveryTax_id'),
-    Column.integer('boxPrice_id'),
-    Column.integer('isDine'),
-    Column.integer('isLegal'),
-    Column.real('amount'),
-    Column.integer('amount_units_id'),
-    Column.integer('ntak_subCat_id'),
-    Column.integer('order'),
-    Column.real('navPrice'),
-    Column.integer('isOneapp_futured'),
-    Column.integer('isCustomOrderApp'),
-    Column.integer('isCustomOrderPos'),
-    Column.text('orderByApp'),
-    Column.text('orderByPos'),
-    Column.integer('orderPos'),
-    Column.integer('discount_schedule_id'),
-    Column.integer('parent_product_id')
-  ])
-])
-;
+  Table('app_taxprofile', [Column.text('tax_name'), Column.real('tax_percentage'), Column.text('createdAt'), Column.text('updatedAt'), Column.integer('restaurant_id'), Column.text('ntak_name')]),
+  Table('users', [Column.text('rest_id'), Column.text('role'), Column.text('pk')]),
+  Table('app_product', [Column.text('product_name'), Column.integer('restaurant_id'), Column.text('user_id')])
+]);
 
 late PowerSyncDatabase db;
 
@@ -94,9 +36,7 @@ class SupabaseConnector extends PowerSyncBackendConnector {
     final token = session.accessToken;
 
     final userId = session.user.id;
-    final expiresAt = session.expiresAt == null
-        ? null
-        : DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 2000);
+    final expiresAt = session.expiresAt == null ? null : DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 2000);
     return PowerSyncCredentials(
       endpoint: 'https://6666c4fcd7363928f51aab41.powersync.journeyapps.com',
       token: token,
@@ -107,10 +47,7 @@ class SupabaseConnector extends PowerSyncBackendConnector {
 
   @override
   void invalidateCredentials() {
-    _refreshFuture = Supabase.instance.client.auth
-        .refreshSession()
-        .timeout(const Duration(seconds: 5))
-        .then((response) => null, onError: (error) => null);
+    _refreshFuture = Supabase.instance.client.auth.refreshSession().timeout(const Duration(seconds: 5)).then((response) => null, onError: (error) => null);
   }
 
   @override
@@ -140,8 +77,7 @@ class SupabaseConnector extends PowerSyncBackendConnector {
 
       await transaction.complete();
     } on PostgrestException catch (e) {
-      if (e.code != null &&
-          fatalResponseCodes.any((re) => re.hasMatch(e.code!))) {
+      if (e.code != null && fatalResponseCodes.any((re) => re.hasMatch(e.code!))) {
         print(lastOp);
         await transaction.complete();
       } else {

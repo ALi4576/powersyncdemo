@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:powersync/powersync.dart';
 import 'package:powersyncdemo/main.dart';
 import 'package:powersyncdemo/schema.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -30,6 +32,31 @@ class _SignupState extends State<Signup> {
   }
 
   @override
+  Future<void> uploadData() async {
+    final batch = await db.getCrudBatch();
+    if (batch == null) return;
+    final rest = Supabase.instance.client.rest;
+
+    for (var op in batch.crud) {
+      final table = rest.from(op.table);
+
+      switch (op.op) {
+        case UpdateType.put:
+          // Send the data to your backend service
+          // Replace `_myApi` with your own API client or service
+          var data = Map<String, dynamic>.of(op.opData!);
+          data['id'] = op.id;
+          await table.upsert(data);
+          break;
+        default:
+          // TODO: implement the other operations (patch, delete)
+          break;
+      }
+    }
+    await batch.complete();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -37,9 +64,9 @@ class _SignupState extends State<Signup> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
+          // crossAxisAlignment: CrossAxisAlignment.stretch,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: _emailController,
@@ -75,24 +102,40 @@ class _SignupState extends State<Signup> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  final user = await db
-                      .get('SELECT * FROM users WHERE id = ?', [getUserId()]);
+                  final products = await db.execute("SELECT id,restaurant_id FROM app_product");
 
-                  print(user);
-                  print('******************');
-                  print(user['rest_id']);
-                  print('******************');
+                  for (var i in products) {
+                    print(i);
+                  }
 
-                  final products = await db.get(
-                    'SELECT email, restaurant_name, phone FROM app_restaurant WHERE id = ?',
-                    [user['rest_id']],
-                  );
-                  print(products);
+                  // inset new product
+                  // await db.execute("INSERT INTO app_product (id,product_name, restaurant_id, user_id) VALUES (uuid(),'Product 1', 50, '83f752e2-9184-40a3-908b-38390861d768')");
                 } catch (e, stack) {
                   print(stack);
                 }
               },
               child: const Text('Test'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await db.execute("UPDATE app_product set product_name = 'Product 7' where id = '85802'");
+                  await db.execute("INSERT INTO app_product (id,product_name, restaurant_id, user_id) VALUES (uuid(),'Product 1', 50, '83f752e2-9184-40a3-908b-38390861d768')");
+
+                  final prod = await db.get("SELECT * FROM app_product where id = '85802'");
+                  print(prod);
+                  // await uploadData().then(
+                  //   (value) {
+                  //     print('Data pushed');
+                  //   },
+                  // );
+
+                  // sync database
+                } catch (e, stack) {
+                  print(stack);
+                }
+              },
+              child: const Text('Push Data'),
             ),
           ],
         ),
