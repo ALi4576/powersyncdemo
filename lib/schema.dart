@@ -4,9 +4,24 @@ import 'package:path/path.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const schema = Schema([
-  Table('app_taxprofile', [Column.text('tax_name'), Column.real('tax_percentage'), Column.text('createdAt'), Column.text('updatedAt'), Column.integer('restaurant_id'), Column.text('ntak_name')]),
-  Table('users', [Column.text('rest_id'), Column.text('role'), Column.text('pk')]),
-  Table('app_product', [Column.text('product_name'), Column.integer('restaurant_id'), Column.text('user_id')])
+  Table('app_taxprofile', [
+    Column.text('tax_name'),
+    Column.real('tax_percentage'),
+    Column.text('createdAt'),
+    Column.text('updatedAt'),
+    Column.integer('restaurant_id'),
+    Column.text('ntak_name')
+  ]),
+  Table('product', [Column.text('product_name'), Column.real('price')]),
+  Table('users',
+      [Column.text('rest_id'), Column.text('role'), Column.text('pk')]),
+  Table('app_product', [
+    Column.text('product_name'),
+    Column.integer('restaurant_id'),
+    Column.text('user_id'),
+    Column.real('price'),
+    Column.integer('category_id')
+  ])
 ]);
 
 late PowerSyncDatabase db;
@@ -36,7 +51,9 @@ class SupabaseConnector extends PowerSyncBackendConnector {
     final token = session.accessToken;
 
     final userId = session.user.id;
-    final expiresAt = session.expiresAt == null ? null : DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 2000);
+    final expiresAt = session.expiresAt == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 2000);
     return PowerSyncCredentials(
       endpoint: 'https://6666c4fcd7363928f51aab41.powersync.journeyapps.com',
       token: token,
@@ -47,7 +64,10 @@ class SupabaseConnector extends PowerSyncBackendConnector {
 
   @override
   void invalidateCredentials() {
-    _refreshFuture = Supabase.instance.client.auth.refreshSession().timeout(const Duration(seconds: 5)).then((response) => null, onError: (error) => null);
+    _refreshFuture = Supabase.instance.client.auth
+        .refreshSession()
+        .timeout(const Duration(seconds: 5))
+        .then((response) => null, onError: (error) => null);
   }
 
   @override
@@ -77,7 +97,8 @@ class SupabaseConnector extends PowerSyncBackendConnector {
 
       await transaction.complete();
     } on PostgrestException catch (e) {
-      if (e.code != null && fatalResponseCodes.any((re) => re.hasMatch(e.code!))) {
+      if (e.code != null &&
+          fatalResponseCodes.any((re) => re.hasMatch(e.code!))) {
         print(lastOp);
         await transaction.complete();
       } else {

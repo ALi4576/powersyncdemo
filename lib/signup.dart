@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:powersync/powersync.dart';
 import 'package:powersyncdemo/main.dart';
+import 'package:powersyncdemo/product.dart';
 import 'package:powersyncdemo/schema.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -60,7 +61,7 @@ class _SignupState extends State<Signup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text('Sign In'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -88,55 +89,69 @@ class _SignupState extends State<Signup> {
                 String email = _emailController.text;
                 String password = _passwordController.text;
                 try {
-                  await supabase.auth.signInWithPassword(
+                  await supabase.auth
+                      .signInWithPassword(
                     email: email,
                     password: password,
-                  );
-                  await openDatabase();
+                  )
+                      .then((value) async {
+                    await openDatabase().then((value) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProductView(),
+                        ),
+                      );
+                    });
+                  });
                 } catch (e) {
                   print(e);
                 }
               },
-              child: const Text('Sign Up'),
+              child: const Text('Sign In'),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  final products = await db.execute("SELECT id,restaurant_id FROM app_product");
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     try {
+            //       final products = await db
+            //           .execute("SELECT id,restaurant_id FROM app_product");
 
-                  for (var i in products) {
-                    print(i);
-                  }
+            //       for (var i in products) {
+            //         print(i);
+            //       }
 
-                  // inset new product
-                  // await db.execute("INSERT INTO app_product (id,product_name, restaurant_id, user_id) VALUES (uuid(),'Product 1', 50, '83f752e2-9184-40a3-908b-38390861d768')");
-                } catch (e, stack) {
-                  print(stack);
-                }
-              },
-              child: const Text('Test'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await db.execute("UPDATE app_product set product_name = 'Product 7' where id = '85802'");
-                  await db.execute("INSERT INTO app_product (id,product_name, restaurant_id, user_id) VALUES (uuid(),'Product 1', 50, '83f752e2-9184-40a3-908b-38390861d768')");
+            //       // inset new product
+            //       // await db.execute("INSERT INTO app_product (id,product_name, restaurant_id, user_id) VALUES (uuid(),'Product 1', 50, '83f752e2-9184-40a3-908b-38390861d768')");
+            //     } catch (e, stack) {
+            //       print(stack);
+            //     }
+            //   },
+            //   child: const Text('Test'),
+            // ),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     try {
+            //       await db.execute(
+            //           "UPDATE app_product set product_name = 'Product 7' where id = '85802'");
+            //       await db.execute(
+            //           "INSERT INTO app_product (id,product_name, restaurant_id, user_id) VALUES (uuid(),'Product 1', 50, '83f752e2-9184-40a3-908b-38390861d768')");
 
-                  final prod = await db.get("SELECT * FROM app_product where id = '85802'");
-                  print(prod);
-                  // await uploadData().then(
-                  //   (value) {
-                  //     print('Data pushed');
-                  //   },
-                  // );
+            //       final prod = await db
+            //           .get("SELECT * FROM app_product where id = '85802'");
+            //       print(prod);
+            //       // await uploadData().then(
+            //       //   (value) {
+            //       //     print('Data pushed');
+            //       //   },
+            //       // );
 
-                  // sync database
-                } catch (e, stack) {
-                  print(stack);
-                }
-              },
-              child: const Text('Push Data'),
-            ),
+            //       // sync database
+            //     } catch (e, stack) {
+            //       print(stack);
+            //     }
+            //   },
+            //   child: const Text('Push Data'),
+            // ),
           ],
         ),
       ),
