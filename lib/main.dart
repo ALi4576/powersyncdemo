@@ -21,7 +21,6 @@ loadSupabase() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await loadSupabase();
-  print(supabase.auth.currentSession);
   if (supabase.auth.currentSession != null) {
     await supabase.auth.refreshSession();
     await openDatabase();

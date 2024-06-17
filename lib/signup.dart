@@ -95,6 +95,7 @@ class _SignupState extends State<Signup> {
                     password: password,
                   )
                       .then((value) async {
+                        print(value);
                     await openDatabase().then((value) async {
                       Navigator.pushReplacement(
                         context,
@@ -104,8 +105,9 @@ class _SignupState extends State<Signup> {
                       );
                     });
                   });
-                } catch (e) {
+                } catch (e,stack) {
                   print(e);
+                  print(stack);
                 }
               },
               child: const Text('Sign In'),
