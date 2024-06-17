@@ -95,7 +95,7 @@ class _SignupState extends State<Signup> {
                     password: password,
                   )
                       .then((value) async {
-                    await openDatabase().then((value) {
+                    await openDatabase().then((value) async {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

@@ -82,7 +82,7 @@ class ProductView extends StatelessWidget {
       // ),
       body: StreamBuilder(
         stream: db.watch(
-          'SELECT * FROM product order by id ',
+          'SELECT * FROM product where rest_id = 1',
         ),
         builder: (context, snapshot) {
           if (snapshot.hasError) {

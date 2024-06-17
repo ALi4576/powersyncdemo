@@ -12,8 +12,10 @@ const schema = Schema([
     Column.integer('restaurant_id'),
     Column.text('ntak_name')
   ]),
-  Table('users',
-      [Column.text('rest_id'), Column.text('role'), Column.text('pk')]),
+  Table(
+    'users',
+    [Column.text('rest_id'), Column.text('role'), Column.text('pk')],
+  ),
   Table('app_product', [
     Column.text('product_name'),
     Column.integer('restaurant_id'),
@@ -24,7 +26,7 @@ const schema = Schema([
   Table('product', [
     Column.text('product_name'),
     Column.real('price'),
-    Column.text('user_id')
+    Column.integer('rest_id')
   ])
 ]);
 
